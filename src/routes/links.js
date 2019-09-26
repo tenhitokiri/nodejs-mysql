@@ -6,6 +6,7 @@ router.get('/add', (req, res) => {
 	res.render('links/add');
 });
 
+//Agregar un link
 router.post('/add', async (req, res) => {
 	const { title, url, description } = req.body;
 	const newLink = {
@@ -13,8 +14,44 @@ router.post('/add', async (req, res) => {
 		url,
 		description
 	};
-	console.log(newLink);
 	await pool.query('insert into links set ?', [ newLink ]);
-	res.send('recibido ok');
+	req.flash('success', 'Link agregado con exito!');
+	res.redirect('/links/');
+});
+
+//Listar todos los links
+router.get('/', async (req, res) => {
+	const links = await pool.query('select * from links');
+	res.render('links/links', { links });
+});
+
+//Eliminar un Link
+router.get('/delete/:id', async (req, res) => {
+	const { id } = req.params;
+	await pool.query('delete from links where id = ?', [ id ]);
+	req.flash('success', 'Link eliminado con exito!');
+	res.redirect('/links');
+});
+
+//Editar Link
+router.post('/edit/:id', async (req, res) => {
+	const { id } = req.params;
+	const { title, url, description } = req.body;
+	updatedLink = {
+		title,
+		url,
+		description
+	};
+
+	const update = await pool.query('update links set  ? where id = ?', [ updatedLink, id ]);
+	req.flash('success', 'Link editado con exito!');
+	res.redirect('/links/');
+});
+
+//Editar link
+router.get('/edit/:id', async (req, res) => {
+	const { id } = req.params;
+	const link = await pool.query('select * from links where id = ?', [ id ]);
+	res.render('links/edit', { link: link[0] });
 });
 module.exports = router;
