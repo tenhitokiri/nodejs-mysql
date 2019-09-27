@@ -7,10 +7,12 @@ const flash = require('connect-flash');
 const session = require('express-session');
 const mySqlStore = require('express-mysql-session');
 const { database } = require('./keys');
+const passport = require('passport');
 
 //const bootstrap = require('bootstrap');
 
 const app = express();
+require('./lib/passport');
 
 //Configuración de la aplicación
 const port = process.env.PORT || 3500;
@@ -48,16 +50,20 @@ app.use(
 	})
 );
 app.use(express.json());
+app.use(passport.initialize());
+app.use(passport.session());
 
 //Variables globales
 app.use((req, res, next) => {
 	app.locals.success = req.flash('success');
+	app.locals.error = req.flash('error');
+	app.locals.user = req.user;
 	next();
 });
 
 //Rutas
 app.use(require('./routes/index'));
-app.use('/users', require('./routes/auth'));
+app.use('/users', require('./routes/users'));
 app.use('/links', require('./routes/links'));
 
 //Archivos Estáticos
