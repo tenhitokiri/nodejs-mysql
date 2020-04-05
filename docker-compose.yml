@@ -1,0 +1,44 @@
+version: '3.1'
+
+services:
+
+    node-api:
+        image: node:12
+        container_name: node_api
+        restart: always
+        ports:  
+            #El puerto expuesto en el caso de node debe ser el mismo por el que corre la app 
+            - "8001:8001"
+        volumes: 
+            - ./nodeapp:/app
+        environment:
+            - MYSQL_SERVER=mysql57
+            - MYSQL_PORT=3306
+            - MYSQL_DB=links
+            - MYSQL_USER=root
+            - MYSQL_PW=.4C3r04dm1n
+            # si se necesita trabajar con la base de datos local solo cambiar el valor de la variable DEPLOYMENT, no borrarla
+            - DEPLOYMENT=dev
+            - PORT=8001
+        
+        working_dir: /app
+        command: bash -c "npm install && npm run dev"
+        networks:
+            - webnet            
+
+    mysql:
+        build: .
+        container_name: mysql57
+        restart: always
+        environment:
+            - MYSQL_ROOT_PASSWORD=.4C3r04dm1n
+        ports:
+            - "3306:3306" 
+        volumes:
+            - /srv/mysql/lib:/var/lib/mysql
+            - /srv/mysql/settings:/etc/mysql
+        networks:
+            - webnet 
+
+networks:
+    webnet: 
